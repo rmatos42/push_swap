@@ -111,6 +111,41 @@ int		get_smallest(t_stack *stack)
 	return (small);
 }
 
+void 	get_to(t_env *env, int value)
+{
+	int i;
+	int j;
+	t_node *node;
+
+	i = 0;
+	j = 0;
+	node = env->stack_a->first;
+	while (node && node->value != value)
+	{
+		i++;
+		node = node->next;
+	}
+	node = env->stack_a->last;
+	while (node && node->value != value)
+	{
+		j++;
+		node = node->prev;
+	}
+	while (env->stack_a->first->value != value)
+	{
+		if (i <= j)
+		{
+			printf("ra\n");
+			rot_a(env);
+		}
+		else
+		{
+			printf("rra\n");
+			rev_rot_a(env);
+		}
+	}
+}
+
 void 	push_smallest(t_env *env)
 {
 	int small;
@@ -118,8 +153,8 @@ void 	push_smallest(t_env *env)
 
 	small = get_smallest(env->stack_a);
 	stack = env->stack_a;
-	while (stack->first->value != small)
-		rot_a(env);
+	get_to(env, small);
+	printf("pb\n");
 	push_b(env);
 }
 
@@ -137,13 +172,12 @@ void 	set_scores(t_stack *stack)
 	while (node)
 	{
 		node->score = get_sorted_loc(arr, len, node->value);
-		printf("%i:%i\n", node->value, node->score);
 		node = node->next;
 		i++;
 	}
 }
 
-int		main(int argc, char **argv)
+int		not_main(int argc, char **argv)
 {
 	int		i;
 	t_env	*env;
@@ -159,12 +193,9 @@ int		main(int argc, char **argv)
 	while (env->stack_a->first)
 		push_smallest(env);
 	while (env->stack_b->first)
-		push_a(env);
-	t_node *node = env->stack_a->first;
-	while (node)
 	{
-		printf("%i\n", node->value);
-		node = node->next;
+		printf("pa\n");
+		push_a(env);
 	}
 	return (0);
 }

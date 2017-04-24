@@ -100,15 +100,11 @@ int		is_sort(t_env *env)
 	return (!env->stack_b->first ? 1 : 0);
 }
 
-void	read_instr(t_env *env)
+void 	read_instr(t_env *env)
 {
 	char *buff;
-
-	print_stack(env->stack_a);
-	print_stack(env->stack_b);
-	while(!is_sort(env))
+	while (get_next_line(0, &buff))
 	{
-		get_next_line(0, &buff);
 		if (ft_strequ(buff, "sa"))
 			swap_a(env);
 		if (ft_strequ(buff, "sb"))
@@ -131,13 +127,12 @@ void	read_instr(t_env *env)
 			rev_rot_b(env);
 		if (ft_strequ(buff, "rrr"))
 			rev_rot_rot(env);
-		print_stack(env->stack_a);
-		print_stack(env->stack_b);
 	}
+	if (is_sort(env))
+		printf("ok\n");
 }
 
-
-int		not_main(int argc, char **argv)
+int		main(int argc, char **argv)
 {
 	int		i;
 	t_env	*env;
