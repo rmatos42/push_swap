@@ -28,7 +28,7 @@ typedef struct		s_env
 
 t_node				*node_init(int value);
 t_stack				*stack_init(void);
-t_env				*env_init(void);
+t_env				*env_init(int argc, char **argv);
 
 //stack functions
 void				print_stack(t_stack *stack);
@@ -50,5 +50,19 @@ void				rot_rot(t_env *env);
 void				rev_rot_a(t_env *env);
 void				rev_rot_b(t_env *env);
 void				rev_rot_rot(t_env *env);
+
+void 	ft_swap(int *n1, int *n2);
+int		partition(int *arr, int left, int right, int pivot);
+void 	ft_qsort(int *arr, int left, int right);
+int		get_sorted_loc(int *arr, int len, int value);
+int		stack_len(t_stack *stack);
+int		*make_array(t_stack *stack);
+int		get_smallest(t_stack *stack);
+void 	get_to(t_env *env, int value);
+void 	push_smallest(t_env *env);
+void 	set_scores(t_env *env);
+void 	read_instr(t_env *env);
+int		is_sort(t_env *env);
+void 	push_swap(t_env *env, int n);
 
 #endif

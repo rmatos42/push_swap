@@ -8,6 +8,7 @@ t_node		*node_init(int value)
 	result->value = value;
 	result->prev = NULL;
 	result->next = NULL;
+	result->score = 0;
 	return (result);
 }
 
