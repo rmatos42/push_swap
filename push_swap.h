@@ -9,6 +9,7 @@
 typedef struct		s_node
 {
 	int				value;
+	int				loc_score;
 	int				score;
 	struct s_node	*prev;
 	struct s_node	*next;
@@ -18,12 +19,20 @@ typedef struct		s_stack
 {
 	struct s_node	*first;
 	struct s_node	*last;
+	int				min;
 }					t_stack;
+
+typedef struct		s_instr
+{
+	char			*str;
+	struct s_instr	*next;
+}					t_instr;
 
 typedef struct		s_env
 {
 	t_stack			*stack_a;
 	t_stack			*stack_b;
+	t_instr			*instructions;
 }					t_env;
 
 t_node				*node_init(int value);
@@ -64,5 +73,10 @@ void 	set_scores(t_env *env);
 void 	read_instr(t_env *env);
 int		is_sort(t_env *env);
 void 	push_swap(t_env *env, int n);
+int		get_min(t_stack *stack);
+int		get_max(t_stack *stack);
+void 	add_instr(t_env *env, char *instr);
+void 	print_instr(t_env *env);
+void 	condense(t_env *env);
 
 #endif

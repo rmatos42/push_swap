@@ -1,6 +1,9 @@
 #include "push_swap.h"
 
-
+void 	solve_three(t_env *env)
+{
+	
+}
 
 int		main(int argc, char **argv)
 {
@@ -13,7 +16,6 @@ int		main(int argc, char **argv)
 	i = 0;
 	tmp = -1;
 	env = env_init(argc, argv);
-	set_scores(env);
 	while (env->stack_a->first)
 	{
 		set_scores(env);
@@ -21,15 +23,35 @@ int		main(int argc, char **argv)
 	}
 	while (env->stack_b->first)
 	{
-		printf("pa\n");
+		add_instr(env, "pa");
 		push_a(env);
 	}
-	print_stack(env->stack_a);
-	// while (!is_sort(env))
-	// {
-	// 	printf("ra\n");
-	// 	rot_a(env);
-	// }
-	// printf("argc%i\n", argc);
+	t_node *node = env->stack_a->first;
+	int count = 0;
+	while (node && node->value != get_min(env->stack_a))
+	{
+		node = node->next;
+		count++;
+	}
+	if (count >= stack_len(env->stack_a) / 2)
+	{
+		count = stack_len(env->stack_a) - count;
+		while (i < count)
+		{
+			add_instr(env, "rra");
+			rev_rot_a(env);
+			i++;
+		}
+	}
+	else
+	{
+		while (i < count)
+		{
+			add_instr(env, "ra");
+			rot_a(env);
+			i++;
+		}
+	}
+	print_instr(env);
 	return (0);
 }

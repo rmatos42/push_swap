@@ -26,10 +26,10 @@ int		get_smallest(t_stack *stack)
 	small_score = 0;
 	while (node)
 	{
-		if (node->score < small_score || node == stack->first)
+		if (node->score + node->loc_score < small_score || node == stack->first)
 		{
 			small = node->value;
-			small_score = node->score;
+			small_score = node->score + node->loc_score;
 		}
 		node = node->next;
 	}
@@ -60,42 +60,106 @@ void 	get_to_a(t_env *env, int value)
 	{
 		if (i <= j)
 		{
-			printf("ra\n");
+			add_instr(env, "ra");
 			rot_a(env);
 		}
 		else
 		{
-			printf("rra\n");
+			add_instr(env, "rra");
 			rev_rot_a(env);
 		}
 	}
 }
 
-int		b_is_sort(t_env *env)
+int		get_min(t_stack *stack)
 {
-	int big;
-	int bigs;
+	int	min;
+	int i;
+	t_node	*node;
+
+	min = 0;
+	i = 0;
+	node = stack->first;
+	while(node)
+	{
+		if (node == stack->first || node->value < min)
+			min = node->value;
+		node = node->next;
+		i++;
+	}
+	return (min);
+}
+
+int		get_max(t_stack *stack)
+{
+	int max;
 	t_node *node;
 
-	big = 0;
-	bigs = 0;
-	node = env->stack_b->first;
+	max = 0;
+	node = stack->first;
 	while (node)
 	{
-		if (node->value > big)
-		{
-			big = node->value;
-			bigs++;
-		}
+		if (node->value > max)
+			max = node->value;
+		node = node->next;
 	}
-	if (bigs == 0 || bigs == 1)
-		return (1);
-	return (0);
+	return (max);
 }
 
 void 	get_to_b(t_env *env, int value)
 {
+	int i;
+	int count;
+	t_node *node;
 
+	count = 0;
+	i = 0;
+	node = env->stack_b->first;
+	if (value <= get_min(env->stack_b) || value >= get_max(env->stack_b))
+	{
+		while (node && node->value != get_max(env->stack_b))
+		{
+			node = node->next;
+			count++;
+		}
+	}
+	else if (node && value > node->value)
+	{
+		count = stack_len(env->stack_b);
+		node = env->stack_b->last;
+		while (node && value > node->value && node->value != get_min(env->stack_b))
+		{
+			node = node->prev;
+			count--;
+		}
+	}
+	else
+	{
+		while (node && node->value > value && node->value != get_min(env->stack_b))
+		{
+			node = node->next;
+			count++;
+		}
+	}
+	if (count >= stack_len(env->stack_b) / 2)
+	{
+		count = stack_len(env->stack_b) - count;
+		while (i < count)
+		{
+			add_instr(env, "rrb");
+			rev_rot_b(env);
+			i++;
+		}
+	}
+	else
+	{
+		while (i < count)
+		{
+			add_instr(env, "rb");
+			rot_b(env);
+			i++;
+		}
+	}
 }
 
 void 	push_smallest(t_env *env)
@@ -108,30 +172,49 @@ void 	push_smallest(t_env *env)
 	j = 0;
 	small = get_smallest(env->stack_a);
 	get_to_a(env, small);
-	// while (i < env->stack_a->first->score)
-	// {
-	// 	printf("rb\n");
-	// 	rot_b(env);
-	// 	i++;
-	// }
 	get_to_b(env, small);
-	printf("pb\n");
+	add_instr(env, "pb");
 	push_b(env);
 }
 
 int		get_score(t_env *env, int value)
 {
-	t_node	*node;
-	int		i;
+	int i;
+	int count;
+	t_node *node;
 
-	node = env->stack_b->first;
+	count = 0;
 	i = 0;
-	while (node && node->value > value)
+	node = env->stack_b->first;
+	if (value <= get_min(env->stack_b) || value >= get_max(env->stack_b))
 	{
-		node = node->next;
-		i++;
+		while (node && node->value != get_max(env->stack_b))
+		{
+			node = node->next;
+			count++;
+		}
 	}
-	return (i);
+	else if (node && value > node->value)
+	{
+		count = stack_len(env->stack_b);
+		node = env->stack_b->last;
+		while (node && value > node->value && node->value != get_min(env->stack_b))
+		{
+			node = node->prev;
+			count--;
+		}
+	}
+	else
+	{
+		while (node && node->value > value && node->value != get_min(env->stack_b))
+		{
+			node = node->next;
+			count++;
+		}
+	}
+	if (count >= stack_len(env->stack_b) / 2)
+		count = stack_len(env->stack_b) - count;
+	return (count);
 }
 
 void 	set_scores(t_env *env)
@@ -144,6 +227,10 @@ void 	set_scores(t_env *env)
 	while (node)
 	{
 		node->score = get_score(env, node->value);
+		if (i >= stack_len(env->stack_a) / 2)
+			node->loc_score = stack_len(env->stack_a) - i;
+		else
+			node->loc_score= i;
 		node = node->next;
 		i++;
 	}
@@ -159,6 +246,7 @@ t_env	*env_init(int argc, char **argv)
 	env = (t_env *)malloc(sizeof(t_env));
 	env->stack_a = stack_init();
 	env->stack_b = stack_init();
+	env->instructions = NULL;
 	if (argc == 2)
 	{
 		split = ft_strsplit(argv[1], ' ');
