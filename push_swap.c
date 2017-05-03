@@ -153,6 +153,7 @@ void 	get_to_b(t_env *env, int value)
 	}
 	else
 	{
+		i = 0;
 		while (i < count)
 		{
 			add_instr(env, "rb");
@@ -353,6 +354,7 @@ void 	read_instr(t_env *env)
 	char *buff;
 	while (get_next_line(0, &buff))
 	{
+
 		if (ft_strequ(buff, "sa"))
 			swap_a(env);
 		if (ft_strequ(buff, "sb"))
@@ -375,12 +377,8 @@ void 	read_instr(t_env *env)
 			rev_rot_b(env);
 		if (ft_strequ(buff, "rrr"))
 			rev_rot_rot(env);
-		printf("stack_a");
 		print_stack(env->stack_a);
-		printf("stack_b");
 		print_stack(env->stack_b);
-		if (env->stack_a->first)
-			printf("score%i\n", get_score(env, env->stack_a->first->value));
 	}
 	if (is_sort(env))
 		printf("ok\n");
