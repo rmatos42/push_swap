@@ -21,6 +21,69 @@ void 	add_instr(t_env *env, char *instr)
 	}
 }
 
+// void 	print_instr(t_env *env)
+// {
+// 	t_instr *list;
+// 	int		ra;
+// 	int		rb;
+// 	int		rra;
+// 	int		rrb;
+//
+// 	ra = 0;
+// 	rb = 0;
+// 	rra = 0;
+// 	rrb = 0;
+// 	list = env->instructions;
+// 	while (list)
+// 	{
+// 		while (list && !ft_strequ(list->str, "pa") && !ft_strequ(list->str, "pb"))
+// 		{
+// 			ra += (ft_strequ(list->str, "ra")) ? 1 : 0;
+// 			rb += (ft_strequ(list->str, "rb")) ? 1 : 0;
+// 			rra += (ft_strequ(list->str, "rra")) ? 1 : 0;
+// 			rrb += (ft_strequ(list->str, "rrb")) ? 1 : 0;
+// 			list = list->next;
+// 		}
+// 		while (ra > 0 && rb > 0)
+// 		{
+// 			printf("rr\n");
+// 			ra--;
+// 			rb--;
+// 		}
+// 		while (rra > 0 && rrb > 0)
+// 		{
+// 			printf("rrr\n");
+// 			rra--;
+// 			rrb--;
+// 		}
+// 		while (ra > 0)
+// 		{
+// 			printf("ra\n");
+// 			ra--;
+// 		}
+// 		while (rb > 0)
+// 		{
+// 			printf("rb\n");
+// 			rb--;
+// 		}
+// 		while (rra > 0)
+// 		{
+// 			printf("rra\n");
+// 			rra--;
+// 		}
+// 		while (rrb > 0)
+// 		{
+// 			printf("rrb\n");
+// 			rrb--;
+// 		}
+// 		if (list)
+// 		{
+// 			printf("%s\n", list->str);
+// 			list = list->next;
+// 		}
+// 	}
+// }
+
 void 	print_instr(t_env *env)
 {
 	t_instr *list;
@@ -36,6 +99,10 @@ void 	print_instr(t_env *env)
 	list = env->instructions;
 	while (list)
 	{
+		ra = 0;
+		rb = 0;
+		rra = 0;
+		rrb = 0;
 		while (list && !ft_strequ(list->str, "pa") && !ft_strequ(list->str, "pb"))
 		{
 			ra += (ft_strequ(list->str, "ra")) ? 1 : 0;
@@ -44,37 +111,74 @@ void 	print_instr(t_env *env)
 			rrb += (ft_strequ(list->str, "rrb")) ? 1 : 0;
 			list = list->next;
 		}
-		while (ra > 0 && rb > 0)
+		int ra_rb = abs(ra - rb) + (ra < rb ? ra : rb);
+		int ra_rrb = ra + rrb;
+		int rra_rrb = abs(rra - rrb) + (rra < rrb ? rra : rrb);
+		int rra_rb = rra + rb;
+		// printf("%i:%i:%i:%i\n", ra_rb, ra_rrb, rra_rrb, rra_rb);
+		if (ra_rb <= ra_rrb && ra_rb <= rra_rrb && ra <= rra_rb)
 		{
-			printf("rr\n");
-			ra--;
-			rb--;
+			while (ra > 0 && rb > 0)
+			{
+				printf("rr\n");
+				ra--;
+				rb--;
+			}
+			while (ra > 0)
+			{
+				printf("ra\n");
+				ra--;
+			}
+			while (rb > 0)
+			{
+				printf("rb\n");
+				rb--;
+			}
 		}
-		while (rra > 0 && rrb > 0)
+		else if (ra_rrb <= ra_rb && ra_rrb <= rra_rrb && ra_rrb <= rra_rb)
 		{
-			printf("rrr\n");
-			rra--;
-			rrb--;
+			while (ra > 0)
+			{
+				printf("ra\n");
+				ra--;
+			}
+			while (rrb > 0)
+			{
+				printf("rrb\n");
+				rrb--;
+			}
 		}
-		while (ra > 0)
+		else if (rra_rrb <= ra_rb && rra_rrb <= ra_rrb && rra_rrb <= rra_rb)
 		{
-			printf("ra\n");
-			ra--;
+			while (rra > 0 && rrb > 0)
+			{
+				printf("rrr\n");
+				rra--;
+				rrb--;
+			}
+			while (rra > 0)
+			{
+				printf("rra\n");
+				rra--;
+			}
+			while (rrb > 0)
+			{
+				printf("rrb\n");
+				rrb--;
+			}
 		}
-		while (rb > 0)
+		else
 		{
-			printf("rb\n");
-			rb--;
-		}
-		while (rra > 0)
-		{
-			printf("rra\n");
-			rra--;
-		}
-		while (rrb > 0)
-		{
-			printf("rrb\n");
-			rrb--;
+			while (rra > 0)
+			{
+				printf("rra\n");
+				rra--;
+			}
+			while (rb > 0)
+			{
+				printf("rb\n");
+				rb--;
+			}
 		}
 		if (list)
 		{

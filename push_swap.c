@@ -36,38 +36,70 @@ int		get_smallest(t_stack *stack)
 	return (small);
 }
 
+// void 	get_to_a(t_env *env, int value)
+// {
+// 	int i;
+// 	int j;
+// 	t_node *node;
+//
+// 	i = 0;
+// 	j = 0;
+// 	node = env->stack_a->first;
+// 	while (node && node->value != value)
+// 	{
+// 		i++;
+// 		node = node->next;
+// 	}
+// 	node = env->stack_a->last;
+// 	while (node && node->value != value)
+// 	{
+// 		j++;
+// 		node = node->prev;
+// 	}
+// 	while (env->stack_a->first->value != value)
+// 	{
+// 		printf("%i:%i:%i\n", value, i, j);
+// 		if (i <= j)
+// 		{
+// 			add_instr(env, "ra");
+// 			rot_a(env);
+// 		}
+// 		else
+// 		{
+// 			add_instr(env, "rra");
+// 			rev_rot_a(env);
+// 		}
+// 	}
+// }
+
 void 	get_to_a(t_env *env, int value)
 {
 	int i;
-	int j;
+	int count;
+	int rev_count;
 	t_node *node;
 
 	i = 0;
-	j = 0;
+	count = 0;
+	rev_count = stack_len(env->stack_a);
 	node = env->stack_a->first;
 	while (node && node->value != value)
 	{
-		i++;
+		count++;
+		rev_count--;
 		node = node->next;
 	}
-	node = env->stack_a->last;
-	while (node && node->value != value)
+	while (i < count)
 	{
-		j++;
-		node = node->prev;
+		add_instr(env, "ra");
+		rot_a(env);
+		i++;
 	}
-	while (env->stack_a->first->value != value)
+	i = 0;
+	while (i < rev_count)
 	{
-		if (i <= j)
-		{
-			add_instr(env, "ra");
-			rot_a(env);
-		}
-		else
-		{
-			add_instr(env, "rra");
-			rev_rot_a(env);
-		}
+		add_instr(env, "rra");
+		i++;
 	}
 }
 
@@ -110,6 +142,7 @@ void 	get_to_b(t_env *env, int value)
 {
 	int i;
 	int count;
+	int rev_count;
 	t_node *node;
 
 	count = 0;
@@ -141,25 +174,18 @@ void 	get_to_b(t_env *env, int value)
 			count++;
 		}
 	}
-	if (count >= stack_len(env->stack_b) / 2)
+	rev_count = stack_len(env->stack_b) - count;
+	while (i < count)
 	{
-		count = stack_len(env->stack_b) - count;
-		while (i < count)
-		{
-			add_instr(env, "rrb");
-			rev_rot_b(env);
-			i++;
-		}
+		add_instr(env, "rb");
+		rot_b(env);
+		i++;
 	}
-	else
+	i = 0;
+	while (i < rev_count)
 	{
-		i = 0;
-		while (i < count)
-		{
-			add_instr(env, "rb");
-			rot_b(env);
-			i++;
-		}
+		add_instr(env, "rrb");
+		i++;
 	}
 }
 
@@ -213,7 +239,7 @@ int		get_score(t_env *env, int value)
 			count++;
 		}
 	}
-	if (count >= stack_len(env->stack_b) / 2)
+	if (count > stack_len(env->stack_b) / 2)
 		count = stack_len(env->stack_b) - count;
 	return (count);
 }
@@ -228,7 +254,7 @@ void 	set_scores(t_env *env)
 	while (node)
 	{
 		node->score = get_score(env, node->value);
-		if (i >= stack_len(env->stack_a) / 2)
+		if (i > stack_len(env->stack_a) / 2)
 			node->loc_score = stack_len(env->stack_a) - i;
 		else
 			node->loc_score= i;
@@ -377,9 +403,9 @@ void 	read_instr(t_env *env)
 			rev_rot_b(env);
 		if (ft_strequ(buff, "rrr"))
 			rev_rot_rot(env);
-		print_stack(env->stack_a);
-		print_stack(env->stack_b);
+		// print_stack(env->stack_a);
+		// print_stack(env->stack_b);
 	}
 	if (is_sort(env))
-		printf("ok\n");
+		printf("OK\n");
 }
