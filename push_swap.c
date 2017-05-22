@@ -162,7 +162,6 @@ void 	push_smallest(t_env *env)
 	i = 0;
 	j = 0;
 	small = get_smallest(env->stack_a);
-	// small = env->stack_a->first->value;
 	get_to_a(env, small);
 	get_to_b(env, small);
 	add_instr(env, "pb");
@@ -228,6 +227,20 @@ void 	set_scores(t_env *env)
 	}
 }
 
+int 	is_valid(char *str)
+{
+	int i;
+
+	i = 0;
+	while (str[i])
+	{
+		if (str[i] < '0' || str[i] > '9' )
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
 t_env	*env_init(int argc, char **argv)
 {
 	t_env	*env;
@@ -243,11 +256,24 @@ t_env	*env_init(int argc, char **argv)
 	{
 		split = ft_strsplit(argv[1], ' ');
 		while (split[i])
-			push_end(env->stack_a, atoi(split[i++]));
+		{
+			if (is_valid(split[i]))
+				push_end(env->stack_a, atoi(split[i++]));
+			else
+			{
+				printf("Error\n");
+				exit(0);
+			}
+		}
+
 	}
 	else
 		while (argv[++i])
-			push_end(env->stack_a, atoi(argv[i]));
+		{
+			if (is_valid(argv[i]))
+				push_end(env->stack_a, atoi(argv[i]));
+
+		}
 	return (env);
 }
 
@@ -337,13 +363,35 @@ int		is_sort(t_env *env)
 			return (0);
 		node = node->next;
 	}
-	// return (!env->stack_b->first ? 1 : 0);
 	return (1);
+}
+
+void 	read_instr_util(t_env *env, char *buff)
+{
+	// printf("buff:%s\n", buff);
+	if (ft_strequ(buff, "ra"))
+		rot_a(env);
+	else if (ft_strequ(buff, "rb"))
+		rot_b(env);
+	else if (ft_strequ(buff, "rr"))
+		rot_rot(env);
+	else if (ft_strequ(buff, "rra"))
+		rev_rot_a(env);
+	else if (ft_strequ(buff, "rrb"))
+		rev_rot_b(env);
+	else if (ft_strequ(buff, "rrr"))
+		rev_rot_rot(env);
+	else if (!ft_strequ(buff, ""))
+	{
+		ft_putstr("Error\n");
+		exit(0);
+	}
 }
 
 void 	read_instr(t_env *env)
 {
 	char *buff;
+
 	while (get_next_line(0, &buff))
 	{
 
@@ -357,26 +405,11 @@ void 	read_instr(t_env *env)
 			push_a(env);
 		else if (ft_strequ(buff, "pb"))
 			push_b(env);
-		else if (ft_strequ(buff, "ra"))
-			rot_a(env);
-		else if (ft_strequ(buff, "rb"))
-			rot_b(env);
-		else if (ft_strequ(buff, "rr"))
-			rot_rot(env);
-		else if (ft_strequ(buff, "rra"))
-			rev_rot_a(env);
-		else if (ft_strequ(buff, "rrb"))
-			rev_rot_b(env);
-		else if (ft_strequ(buff, "rrr"))
-			rev_rot_rot(env);
 		else
-		{
-			ft_putstr("Error\n");
-			exit(0);
-		}
+			read_instr_util(env, buff);
 	}
 	if (is_sort(env))
-		printf("OK\n");
+		ft_putstr("OK\n");
 	else
 		ft_putstr("KO\n");
 }
