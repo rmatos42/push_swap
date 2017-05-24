@@ -21,264 +21,125 @@ void 	add_instr(t_env *env, char *instr)
 	}
 }
 
-// void 	print_instr(t_env *env)
-// {
-// 	t_instr *list;
-// 	int		ra;
-// 	int		rb;
-// 	int		rra;
-// 	int		rrb;
-//
-// 	ra = 0;
-// 	rb = 0;
-// 	rra = 0;
-// 	rrb = 0;
-// 	list = env->instructions;
-// 	while (list)
-// 	{
-// 		while (list && !ft_strequ(list->str, "pa") && !ft_strequ(list->str, "pb"))
-// 		{
-// 			ra += (ft_strequ(list->str, "ra")) ? 1 : 0;
-// 			rb += (ft_strequ(list->str, "rb")) ? 1 : 0;
-// 			rra += (ft_strequ(list->str, "rra")) ? 1 : 0;
-// 			rrb += (ft_strequ(list->str, "rrb")) ? 1 : 0;
-// 			list = list->next;
-// 		}
-// 		while (ra > 0 && rb > 0)
-// 		{
-// 			printf("rr\n");
-// 			ra--;
-// 			rb--;
-// 		}
-// 		while (rra > 0 && rrb > 0)
-// 		{
-// 			printf("rrr\n");
-// 			rra--;
-// 			rrb--;
-// 		}
-// 		while (ra > 0)
-// 		{
-// 			printf("ra\n");
-// 			ra--;
-// 		}
-// 		while (rb > 0)
-// 		{
-// 			printf("rb\n");
-// 			rb--;
-// 		}
-// 		while (rra > 0)
-// 		{
-// 			printf("rra\n");
-// 			rra--;
-// 		}
-// 		while (rrb > 0)
-// 		{
-// 			printf("rrb\n");
-// 			rrb--;
-// 		}
-// 		if (list)
-// 		{
-// 			printf("%s\n", list->str);
-// 			list = list->next;
-// 		}
-// 	}
-// }
-
-void 	print_instr(t_env *env)
+void 	calc_direction(t_combo *var, t_instr **list)
 {
-	t_instr *list;
-	int		ra;
-	int		rb;
-	int		rra;
-	int		rrb;
+	t_instr *tmp;
 
-	ra = 0;
-	rb = 0;
-	rra = 0;
-	rrb = 0;
-	list = env->instructions;
-	while (list)
+	var->ra = 0;
+	var->rb = 0;
+	var->rra = 0;
+	var->rrb = 0;
+	while (*list && !ft_strequ((*list)->str, "pa")
+		&& !ft_strequ((*list)->str, "pb"))
 	{
-		ra = 0;
-		rb = 0;
-		rra = 0;
-		rrb = 0;
-		while (list && !ft_strequ(list->str, "pa") && !ft_strequ(list->str, "pb"))
-		{
-			ra += (ft_strequ(list->str, "ra")) ? 1 : 0;
-			rb += (ft_strequ(list->str, "rb")) ? 1 : 0;
-			rra += (ft_strequ(list->str, "rra")) ? 1 : 0;
-			rrb += (ft_strequ(list->str, "rrb")) ? 1 : 0;
-			list = list->next;
-		}
-		int ra_rb = abs(ra - rb) + (ra < rb ? ra : rb);
-		int ra_rrb = ra + rrb;
-		int rra_rrb = abs(rra - rrb) + (rra < rrb ? rra : rrb);
-		int rra_rb = rra + rb;
-		// printf("%i:%i:%i:%i\n", ra_rb, ra_rrb, rra_rrb, rra_rb);
-		if (ra_rb <= ra_rrb && ra_rb <= rra_rrb && ra <= rra_rb)
-		{
-			while (ra > 0 && rb > 0)
-			{
-				printf("rr\n");
-				ra--;
-				rb--;
-			}
-			while (ra > 0)
-			{
-				printf("ra\n");
-				ra--;
-			}
-			while (rb > 0)
-			{
-				printf("rb\n");
-				rb--;
-			}
-		}
-		else if (ra_rrb <= ra_rb && ra_rrb <= rra_rrb && ra_rrb <= rra_rb)
-		{
-			while (ra > 0)
-			{
-				printf("ra\n");
-				ra--;
-			}
-			while (rrb > 0)
-			{
-				printf("rrb\n");
-				rrb--;
-			}
-		}
-		else if (rra_rrb <= ra_rb && rra_rrb <= ra_rrb && rra_rrb <= rra_rb)
-		{
-			while (rra > 0 && rrb > 0)
-			{
-				printf("rrr\n");
-				rra--;
-				rrb--;
-			}
-			while (rra > 0)
-			{
-				printf("rra\n");
-				rra--;
-			}
-			while (rrb > 0)
-			{
-				printf("rrb\n");
-				rrb--;
-			}
-		}
-		else
-		{
-			while (rra > 0)
-			{
-				printf("rra\n");
-				rra--;
-			}
-			while (rb > 0)
-			{
-				printf("rb\n");
-				rb--;
-			}
-		}
-		if (list)
-		{
-			printf("%s\n", list->str);
-			list = list->next;
-		}
+		tmp = *list;
+		var->ra += (ft_strequ((*list)->str, "ra")) ? 1 : 0;
+		var->rb += (ft_strequ((*list)->str, "rb")) ? 1 : 0;
+		var->rra += (ft_strequ((*list)->str, "rra")) ? 1 : 0;
+		var->rrb += (ft_strequ((*list)->str, "rrb")) ? 1 : 0;
+		*list = (*list)->next;
+		free(tmp);
+	}
+	var->ra_rb = abs(var->ra - var->rb)
+		+ (var->ra < var->rb ? var->ra : var->rb);
+	var->ra_rrb = var->ra + var->rrb;
+	var->rra_rrb = abs(var->rra - var->rrb)
+		+ (var->rra < var->rrb ? var->rra : var->rrb);
+	var->rra_rb = var->rra + var->rb;
+}
+
+void 	print_ra_rb(t_combo *var)
+{
+	while (var->ra > 0 && var->rb > 0)
+	{
+		ft_putstr("rr\n");
+		var->ra--;
+		var->rb--;
+	}
+	while (var->ra > 0)
+	{
+		ft_putstr("ra\n");
+		var->ra--;
+	}
+	while (var->rb > 0)
+	{
+		ft_putstr("rb\n");
+		var->rb--;
 	}
 }
 
-// void 	print_instr(t_env *env)
-// {
-// 	t_instr *list;
-// 	int		ra;
-// 	int		rb;
-// 	int		rra;
-// 	int		rrb;
-//
-// 	ra = 0;
-// 	rb = 0;
-// 	rra = 0;
-// 	rrb = 0;
-// 	int ra_rb = 0;
-// 	int ra_rrb = 0;
-// 	int rra_rb = 0;
-// 	int rra_rrb = 0;
-// 	list = env->instructions;
-// 	while (list)
-// 	{
-// 		while (list && !ft_strequ(list->str, "pa") && !ft_strequ(list->str, "pb"))
-// 		{
-// 			ra += (ft_strequ(list->str, "ra")) ? 1 : 0;
-// 			rb += (ft_strequ(list->str, "rb")) ? 1 : 0;
-// 			rra += (ft_strequ(list->str, "rra")) ? 1 : 0;
-// 			rrb += (ft_strequ(list->str, "rrb")) ? 1 : 0;
-// 			list = list->next;
-// 		}
-// 		ra_rb = abs(ra - rb);
-// 		ra_rrb = ra + rrb;
-// 		rra_rb = rra + rb;
-// 		rra_rrb = abs(rra - rrb);
-// 		if (ra_rb <= ra_rrb && ra_rb <= rra_rb && ra_rb <= rra_rrb)
-// 		{
-// 			while (ra)
-// 			{
-// 				printf("ra\n");
-// 				ra--;
-// 			}
-// 			while (rb)
-// 			{
-// 				printf("rb\n");
-// 				rb--;
-// 			}
-// 		}
-// 		else if (ra_rrb <= ra_rb && ra_rrb <= rra_rb && ra_rrb <= rra_rrb)
-// 		{
-// 			while (ra)
-// 			{
-// 				printf("ra\n");
-// 				ra--;
-// 			}
-// 			while (rrb)
-// 			{
-// 				printf("rrb\n");
-// 				rrb--;
-// 			}
-// 		}
-// 		else if (rra_rb <= ra_rb && rra_rb <= ra_rrb && rra_rb <= rra_rrb)
-// 		{
-// 			while (rra)
-// 			{
-// 				printf("rra\n");
-// 				rra--;
-// 			}
-// 			while (rb)
-// 			{
-// 				printf("rb\n");
-// 				rb--;
-// 			}
-// 		}
-// 		else
-// 		{
-// 			while (rra)
-// 			{
-// 				printf("rra\n");
-// 				rra--;
-// 			}
-// 			while (rrb)
-// 			{
-// 				printf("rrb\n");
-// 				rrb--;
-// 			}
-// 		}
-// 		ra = 0;
-// 		rb = 0;
-// 		rra = 0;
-// 		rrb = 0;
-// 		if (list)
-// 		{
-// 			printf("%s\n", list->str);
-// 			list = list->next;
-// 		}
-// 	}
-// }
+void 	print_ra_rrb(t_combo *var)
+{
+	while (var->ra > 0)
+	{
+		ft_putstr("ra\n");
+		var->ra--;
+	}
+	while (var->rrb > 0)
+	{
+		ft_putstr("rrb\n");
+		var->rrb--;
+	}
+}
+
+void 	print_rra_rrb(t_combo *var)
+{
+	while (var->rra > 0 && var->rrb > 0)
+	{
+		ft_putstr("rrr\n");
+		var->rra--;
+		var->rrb--;
+	}
+	while (var->rra > 0)
+	{
+		ft_putstr("rra\n");
+		var->rra--;
+	}
+	while (var->rrb > 0)
+	{
+		ft_putstr("rrb\n");
+		var->rrb--;
+	}
+}
+
+void 	print_rra_rb(t_combo *var)
+{
+	while (var->rra > 0)
+	{
+		ft_putstr("rra\n");
+		var->rra--;
+	}
+	while (var->rb > 0)
+	{
+		ft_putstr("rb\n");
+		var->rb--;
+	}
+}
+
+void 	print_instr(t_env *env)
+{
+	t_instr	*list;
+	t_instr	*tmp;
+	t_combo	var;
+
+	list = env->instructions;
+	while (list)
+	{
+		calc_direction(&var, &list);
+		if (var.ra_rb <= var.ra_rrb && var.ra_rb <= var.rra_rrb && var.ra <= var.rra_rb)
+			print_ra_rb(&var);
+		else if (var.ra_rrb <= var.ra_rb && var.ra_rrb <= var.rra_rrb && var.ra_rrb <= var.rra_rb)
+			print_ra_rrb(&var);
+		else if (var.rra_rrb <= var.ra_rb && var.rra_rrb <= var.ra_rrb && var.rra_rrb <= var.rra_rb)
+			print_rra_rrb(&var);
+		else
+			print_rra_rb(&var);
+		if (list)
+		{
+			tmp = list;
+			ft_putendl(list->str);
+			list = list->next;
+			free(tmp);
+		}
+	}
+}

@@ -38,12 +38,12 @@ int		get_smallest(t_stack *stack)
 
 void 	get_to_a(t_env *env, int value)
 {
-	int i;
-	int count;
-	int rev_count;
-	t_node *node;
+	int		i;
+	int		count;
+	int		rev_count;
+	t_node	*node;
 
-	i = 0;
+	i = -1;
 	count = 0;
 	rev_count = stack_len(env->stack_a);
 	node = env->stack_a->first;
@@ -53,18 +53,14 @@ void 	get_to_a(t_env *env, int value)
 		rev_count--;
 		node = node->next;
 	}
-	while (i < count)
+	while (++i < count)
 	{
 		add_instr(env, "ra");
 		rot_a(env);
-		i++;
 	}
-	i = 0;
-	while (i < rev_count)
-	{
+	i = -1;
+	while (++i < rev_count)
 		add_instr(env, "rra");
-		i++;
-	}
 }
 
 int		get_min(t_stack *stack)
@@ -102,43 +98,38 @@ int		get_max(t_stack *stack)
 	return (max);
 }
 
-void 	get_to_b(t_env *env, int value)
+void 	search_util(t_env *env, int value, int *count)
 {
-	int i;
-	int count;
-	int rev_count;
 	t_node *node;
 
-	count = 0;
-	i = 0;
 	node = env->stack_b->first;
-	if (value <= get_min(env->stack_b) || value >= get_max(env->stack_b))
+	if (node && value > node->value)
 	{
-		while (node && node->value != get_max(env->stack_b))
-		{
-			node = node->next;
-			count++;
-		}
-	}
-	else if (node && value > node->value)
-	{
-		count = stack_len(env->stack_b);
+		*count = stack_len(env->stack_b);
 		node = env->stack_b->last;
-		while (node && value > node->value && node->value != get_min(env->stack_b))
+		while (node && value > node->value
+			&& node->value != get_min(env->stack_b))
 		{
 			node = node->prev;
-			count--;
+			(*count)--;
 		}
 	}
 	else
 	{
-		while (node && node->value > value && node->value != get_min(env->stack_b))
+		while (node && node->value > value
+			&& node->value != get_min(env->stack_b))
 		{
 			node = node->next;
-			count++;
+			(*count)++;
 		}
 	}
-	rev_count = stack_len(env->stack_b) - count;
+}
+
+void 	get_to_b_util(t_env *env, int count, int rev_count)
+{
+	int i;
+
+	i = 0;
 	while (i < count)
 	{
 		add_instr(env, "rb");
@@ -151,6 +142,28 @@ void 	get_to_b(t_env *env, int value)
 		add_instr(env, "rrb");
 		i++;
 	}
+}
+
+void 	get_to_b(t_env *env, int value)
+{
+	int count;
+	int rev_count;
+	t_node *node;
+
+	count = 0;
+	node = env->stack_b->first;
+	if (value <= get_min(env->stack_b) || value >= get_max(env->stack_b))
+	{
+		while (node && node->value != get_max(env->stack_b))
+		{
+			node = node->next;
+			count++;
+		}
+	}
+	else
+		search_util(env, value, &count);
+	rev_count = stack_len(env->stack_b) - count;
+	get_to_b_util(env, count, rev_count);
 }
 
 void 	push_smallest(t_env *env)
@@ -185,24 +198,8 @@ int		get_score(t_env *env, int value)
 			count++;
 		}
 	}
-	else if (node && value > node->value)
-	{
-		count = stack_len(env->stack_b);
-		node = env->stack_b->last;
-		while (node && value > node->value && node->value != get_min(env->stack_b))
-		{
-			node = node->prev;
-			count--;
-		}
-	}
 	else
-	{
-		while (node && node->value > value && node->value != get_min(env->stack_b))
-		{
-			node = node->next;
-			count++;
-		}
-	}
+		search_util(env, value, &count);
 	if (count > stack_len(env->stack_b) / 2)
 		count = stack_len(env->stack_b) - count;
 	return (count);
@@ -221,7 +218,7 @@ void 	set_scores(t_env *env)
 		if (i > stack_len(env->stack_a) / 2)
 			node->loc_score = stack_len(env->stack_a) - i;
 		else
-			node->loc_score= i;
+			node->loc_score = i;
 		node = node->next;
 		i++;
 	}
@@ -234,18 +231,54 @@ int 	is_valid(char *str)
 	i = 0;
 	while (str[i])
 	{
-		if (str[i] < '0' || str[i] > '9' )
+		if ((str[i] < '0' || str[i] > '9') && (str[i] != '-' || i != 0))
 			return (0);
 		i++;
 	}
 	return (1);
 }
 
+void 	one_arg(char **argv, t_env *env)
+{
+	char	**split;
+	int		i;
+
+	i = 0;
+	split = ft_strsplit(argv[1], ' ');
+	while (split[i])
+	{
+		if (is_valid(split[i]))
+			push_end(env->stack_a, ft_atoi(split[i++]));
+		else
+		{
+			ft_putstr("Error\n");
+			exit(0);
+		}
+	}
+	free(split);
+}
+
+void 	mult_arg(char **argv, t_env *env)
+{
+	int i;
+
+	i = 0;
+	while (argv[++i])
+	{
+		if (is_valid(argv[i]))
+			push_end(env->stack_a, ft_atoi(argv[i]));
+		else
+		{
+			ft_putstr("Error\n");
+			exit(0);
+		}
+	}
+}
+
 t_env	*env_init(int argc, char **argv)
 {
 	t_env	*env;
 	int		i;
-	char	**split;
 
 	i = 0;
 	env = (t_env *)malloc(sizeof(t_env));
@@ -253,27 +286,9 @@ t_env	*env_init(int argc, char **argv)
 	env->stack_b = stack_init();
 	env->instructions = NULL;
 	if (argc == 2)
-	{
-		split = ft_strsplit(argv[1], ' ');
-		while (split[i])
-		{
-			if (is_valid(split[i]))
-				push_end(env->stack_a, atoi(split[i++]));
-			else
-			{
-				printf("Error\n");
-				exit(0);
-			}
-		}
-
-	}
+		one_arg(argv, env);
 	else
-		while (argv[++i])
-		{
-			if (is_valid(argv[i]))
-				push_end(env->stack_a, atoi(argv[i]));
-
-		}
+		mult_arg(argv, env);
 	return (env);
 }
 
@@ -289,13 +304,15 @@ void	swap_int(int *nb1, int *nb2)
 void	swap_a(t_env *env)
 {
 	if (env->stack_a->first->next)
-		swap_int(&env->stack_a->first->value, &env->stack_a->first->next->value);
+		swap_int(&env->stack_a->first->value,
+			&env->stack_a->first->next->value);
 }
 
 void	swap_b(t_env *env)
 {
 	if (env->stack_b->first->next)
-		swap_int(&env->stack_b->first->value, &env->stack_b->first->next->value);
+		swap_int(&env->stack_b->first->value,
+			&env->stack_b->first->next->value);
 }
 
 void	swap_swap(t_env *env)
@@ -368,7 +385,6 @@ int		is_sort(t_env *env)
 
 void 	read_instr_util(t_env *env, char *buff)
 {
-	// printf("buff:%s\n", buff);
 	if (ft_strequ(buff, "ra"))
 		rot_a(env);
 	else if (ft_strequ(buff, "rb"))

@@ -1,5 +1,40 @@
 #include "push_swap.h"
 
+void 	free_stack(t_stack *stack)
+{
+	t_node *node;
+	t_node *tmp;
+
+	node = stack->first;
+	while (node)
+	{
+		tmp = node;
+		node = node->next;
+		free(tmp);
+	}
+	free(stack);
+}
+
+void 	free_env(t_env *env)
+{
+	free_stack(env->stack_a);
+	free_stack(env->stack_b);
+	free(env);
+}
+
+void 	print_and_free(t_instr *instr)
+{
+	t_instr *tmp;
+
+	while (instr)
+	{
+		tmp = instr;
+		ft_putendl(instr->str);
+		instr = instr->next;
+		free(tmp);
+	}
+}
+
 void 	solve_three(t_env *env)
 {
 	t_node *node;
@@ -46,14 +81,22 @@ int 	get_min_i(t_stack *stack)
 	return (min_i);
 }
 
-void 	solve_five(t_env *env)
+void 	push_min_util(t_env *env, int *i, int *count)
 {
-	t_node	*node;
-	int 	i;
-	int		count;
+	while (*i < *count)
+	{
+		add_instr(env, "ra");
+		rot_a(env);
+		(*i)++;
+	}
+}
 
-	if (stack_len(env->stack_a) != 5)
-		return ;
+void 	push_min(t_env *env)
+{
+	int count;
+	int i;
+
+	count = 0;
 	while (stack_len(env->stack_a) != 3)
 	{
 		i = 0;
@@ -69,17 +112,21 @@ void 	solve_five(t_env *env)
 			}
 		}
 		else
-		{
-			while (i < count)
-			{
-				add_instr(env, "ra");
-				rot_a(env);
-				i++;
-			}
-		}
+			push_min_util(env, &i, &count);
 		add_instr(env, "pb");
 		push_b(env);
 	}
+}
+
+void 	solve_five(t_env *env)
+{
+	t_node	*node;
+	int 	i;
+	int		count;
+
+	if (stack_len(env->stack_a) != 5)
+		return ;
+	push_min(env);
 	solve_three(env);
 	while (env->stack_b->first)
 	{
@@ -91,24 +138,61 @@ void 	solve_five(t_env *env)
 		add_instr(env, "sa");
 		swap_a(env);
 	}
-	t_instr *instr = env->instructions;
-	while (instr)
+	print_and_free(env->instructions);
+
+}
+
+void 	make_a_sort(t_env *env)
+{
+	int 	i;
+	t_node	*node;
+	int		count;
+
+	i = -1;
+	count = 0;
+	node = env->stack_a->first;
+	while (node && node->value != get_min(env->stack_a))
 	{
-		printf("%s\n", instr->str);
-		instr = instr->next;
+		node = node->next;
+		count++;
+	}
+	while (++i < count)
+	{
+		add_instr(env, "ra");
+		rot_a(env);
+	}
+	i = -1;
+	count = stack_len(env->stack_a) - count;
+	while (++i < count)
+		add_instr(env, "rra");
+	free_env(env);
+	print_instr(env);
+}
+
+void 	solve_three_and_five(t_env *env)
+{
+	t_instr		*instr;
+	t_instr		*tmp;
+
+	if (stack_len(env->stack_a) == 5)
+	{
+		solve_five(env);
+		free_env(env);
+	}
+	else
+	{
+		solve_three(env);
+		print_and_free(env->instructions);
+		free_env(env);
 	}
 }
 
 int		main(int argc, char **argv)
 {
-	int		i;
-	int		tmp;
 	t_env	*env;
 
 	if (argc == 1)
 		return (0);
-	i = 0;
-	tmp = -1;
 	env = env_init(argc, argv);
 	if (stack_len(env->stack_a) != 3 && stack_len(env->stack_a) != 5)
 	{
@@ -123,43 +207,11 @@ int		main(int argc, char **argv)
 			push_a(env);
 		}
 	}
-	else if (stack_len(env->stack_a) == 5)
-	{
-		solve_five(env);
-		return (0);
-	}
 	else
 	{
-		solve_three(env);
-		t_instr *instr = env->instructions;
-		while (instr)
-		{
-			printf("%s\n", instr->str);
-			instr = instr->next;
-		}
+		solve_three_and_five(env);
 		return (0);
 	}
-	t_node *node = env->stack_a->first;
-	int count = 0;
-	int rev_count = stack_len(env->stack_a);
-	while (node && node->value != get_min(env->stack_a))
-	{
-		node = node->next;
-		count++;
-		rev_count--;
-	}
-	while (i < count)
-	{
-		add_instr(env, "ra");
-		rot_a(env);
-		i++;
-	}
-	i = 0;
-	while (i < rev_count)
-	{
-		add_instr(env, "rra");
-		i++;
-	}
-	print_instr(env);
+	make_a_sort(env);
 	return (0);
 }

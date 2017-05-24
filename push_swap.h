@@ -35,6 +35,18 @@ typedef struct		s_env
 	t_instr			*instructions;
 }					t_env;
 
+typedef struct s_combo
+{
+	int			ra;
+	int			rb;
+	int 		rra;
+	int 		rrb;
+	int			ra_rb;
+	int			ra_rrb;
+	int			rra_rrb;
+	int			rra_rb;
+}				t_combo;
+
 t_node				*node_init(int value);
 t_stack				*stack_init(void);
 t_env				*env_init(int argc, char **argv);
